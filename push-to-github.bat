@@ -36,11 +36,24 @@ if errorlevel 1 (
 git remote get-url origin >nul 2>&1
 if errorlevel 1 ( git remote add origin %REPO_URL% ) else ( git remote set-url origin %REPO_URL% )
 
+echo Checking connection to GitHub...
+git ls-remote %REPO_URL% >nul 2>&1
+if errorlevel 1 (
+    nslookup github.com >nul 2>&1
+    if errorlevel 1 (
+        echo.
+        echo CANNOT REACH GITHUB - this is a network/DNS problem, not a Git problem.
+        echo Your commit is saved. Try: connect to working internet, turn off VPN/proxy,
+        echo run "ipconfig /flushdns", or set DNS to 8.8.8.8. Then run this script again.
+        pause & exit /b 1
+    )
+)
+
 echo Pushing... sign in to GitHub if a browser window opens.
 git push -u origin main
 if errorlevel 1 (
     echo.
-    echo Push rejected - the repo already has commits. Merging them in, then retrying...
+    echo Push failed - trying to merge existing GitHub commits, then retrying...
     git pull origin main --allow-unrelated-histories --no-edit
     if errorlevel 1 (
         echo.
