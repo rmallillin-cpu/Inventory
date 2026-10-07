@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Thea</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="dot"></span> THEA <span class="dim" style="font-weight:400;font-size:13px;margin-left:6px">/ admin</span></div>
+  <div class="topbar-actions">
+    <span class="dim" id="whoami" style="font-size:12px"></span>
+    <a href="/" class="btn btn-ghost btn-sm">View storefront</a>
+    <button class="btn btn-ghost btn-sm" id="pwBtn" style="display:none">Change password</button>
+    <button class="btn btn-ghost btn-sm" id="logoutBtn" style="display:none">Log out</button>
+  </div>
+</div>
+
+<div class="container" style="padding-top:30px;max-width:480px" id="loginScreen">
+  <h1 style="font-family:var(--font-display)">Admin login</h1>
+  <div class="field"><label>Username</label><input id="loginUser" placeholder="admin"></div>
+  <div class="field"><label>Password</label><input id="loginPass" type="password" placeholder="••••••••"></div>
+  <button class="btn btn-primary" id="loginBtn" style="width:100%;justify-content:center">Log in</button>
+  <p class="dim" style="text-align:center;font-size:13px;margin-top:16px">No account? <a href="#" id="showSignup">Request access</a></p>
+  <div id="signupBox" style="display:none;margin-top:8px">
+    <h2 style="font-family:var(--font-display)">Request access</h2>
+    <div class="field"><label>Choose a username</label><input id="suUser" autocomplete="off"></div>
+    <div class="field"><label>Choose a password (min 8)</label><input id="suPass" type="password" autocomplete="new-password"></div>
+    <button class="btn btn-ghost" id="signupBtn" style="width:100%;justify-content:center">Submit request</button>
+    <div class="dim" style="font-size:12px;margin-top:8px">An admin must approve your request before you can log in.</div>
+  </div>
+</div>
+
+<div class="container" style="display:none;padding-top:30px;max-width:480px" id="changeScreen">
+  <h1 style="font-family:var(--font-display)" id="changeTitle">Change password</h1>
+  <p class="dim" id="changeNote" style="font-size:13px"></p>
+  <div class="field"><label>Current password</label><input id="cpOld" type="password" autocomplete="current-password"></div>
+  <div class="field"><label>New password (min 8)</label><input id="cpNew" type="password" autocomplete="new-password"></div>
+  <button class="btn btn-primary" id="cpBtn" style="width:100%;justify-content:center">Save new password</button>
+  <button class="btn btn-ghost" id="cpCancel" style="width:100%;justify-content:center;margin-top:8px;display:none">Cancel</button>
+</div>
+
+<div class="container" id="dashboard" style="display:none;padding-top:24px;padding-bottom:60px">
+  <div class="chips">
+    <button class="chip active" data-tab="dashboard">Dashboard</button>
+    <button class="chip" data-tab="items">Inventory</button>
+    <button class="chip" data-tab="orders">Orders</button>
+    <button class="chip" data-tab="movements">Stock history</button>
+    <button class="chip" data-tab="users" id="usersChip" style="display:none">Users</button>
+  </div>
+
+  <div id="tab-dashboard">
+    <div class="row" style="margin:18px 0"><h2 style="font-family:var(--font-display);margin:0">Overview</h2></div>
+    <div id="statTiles" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px"></div>
+    <div id="statLists" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:12px"></div>
+  </div>
+
+  <div id="tab-items" style="display:none">
+    <div class="row" style="margin:18px 0;flex-wrap:wrap;gap:8px">
+      <h2 style="font-family:var(--font-display);margin:0">Items</h2>
+      <span class="spacer"></span>
+      <input id="invSearch" placeholder="Search name, SKU, group..." style="min-width:180px">
+      <select id="invFilter"><option value="">All stock</option><option value="low">Low stock</option><option value="out">Out of stock</option></select>
+      <a class="btn btn-ghost btn-sm" href="/api/export/items.csv">Export CSV</a>
+      <button class="btn btn-primary btn-sm" id="newItemBtn">+ Add item</button>
+    </div>
+    <div class="grid" id="adminGrid"></div>
+  </div>
+
+  <div id="tab-orders" style="display:none">
+    <div class="row" style="margin:18px 0"><h2 style="font-family:var(--font-display);margin:0">Order requests</h2><span class="spacer"></span>
+      <a class="btn btn-ghost btn-sm" href="/api/export/orders.csv">Export CSV</a></div>
+    <div id="ordersList" class="stack"></div>
+  </div>
+
+  <div id="tab-movements" style="display:none">
+    <h2 style="font-family:var(--font-display);margin:18px 0">Stock history <span class="dim" style="font-size:13px;font-weight:400">(last 200 changes)</span></h2>
+    <div id="movementsList" class="stack" style="gap:6px"></div>
+  </div>
+
+  <div id="tab-users" style="display:none">
+    <h2 style="font-family:var(--font-display);margin:18px 0">Team accounts</h2>
+    <div class="card" style="padding:16px;margin-bottom:14px">
+      <div class="field-row">
+        <div class="field"><label>Username</label><input id="nuName" autocomplete="off"></div>
+        <div class="field"><label>Temporary password (blank = auto-generate)</label><input id="nuPass" type="text" autocomplete="off"></div>
+        <div class="field"><label>Role</label><select id="nuRole"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
+      </div>
+      <button class="btn btn-primary btn-sm" id="nuBtn">Create account</button>
+      <div class="dim" style="font-size:12px;margin-top:8px">Staff can manage items, stock and orders. Only admins can delete items and manage accounts.</div>
+    </div>
+    <div id="usersList" class="stack"></div>
+  </div>
+</div>
+
+<!-- Item editor modal -->
+<div class="overlay" id="editorOverlay" style="display:none">
+  <div class="modal" style="max-width:520px">
+    <button class="modal-close" onclick="closeEditor()">×</button>
+    <div style="padding:22px">
+      <h2 id="editorTitle" style="font-family:var(--font-display);margin-top:0">Add item</h2>
+
+      <div class="field">
+        <label>Photo</label>
+        <div class="row" style="align-items:flex-start;gap:14px">
+          <div id="photoPreview" style="width:100px;height:100px;border-radius:12px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
+            <span class="dim" style="font-size:11px">no photo</span>
+          </div>
+          <div class="stack" style="gap:8px">
+            <label class="btn btn-sm" style="justify-content:center">
+              📷 Take / choose photo
+              <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none">
+            </label>
+            <span class="dim" style="font-size:12px">Photos are auto-compressed to fit Google Sheets.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field"><label>Item name</label><input id="fName" placeholder="e.g. Lightstick Ver. 3"></div>
+      <div class="field-row">
+        <div class="field"><label>Group / Artist</label><input id="fGroup" placeholder="e.g. SEVENTEEN"></div>
+        <div class="field"><label>Category</label>
+          <select id="fCategory">
+            <option>Album</option><option>Photocard</option><option>Lightstick</option>
+            <option>Apparel</option><option>Accessory</option><option>Poster</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Price (₱)</label><input id="fPrice" type="number" min="0" step="0.01" placeholder="0.00"></div>
+        <div class="field"><label>Stock quantity</label><input id="fStock" type="number" min="0" step="1" placeholder="0"></div>
+      </div>
+      <div class="field"><label>SKU (optional, auto-generated if blank)</label><input id="fSku" placeholder="e.g. SVT-LS-V3"></div>
+      <div class="field"><label>Description</label><textarea id="fDescription" rows="3" placeholder="Details, condition, included items..."></textarea></div>
+
+      <div class="row" style="margin-top:8px">
+        <button class="btn btn-primary" id="saveItemBtn" style="flex:1;justify-content:center">Save item</button>
+        <button class="btn btn-danger btn-sm" id="deleteItemBtn" style="display:none">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toastHost"></div>
+
+<script src="/js/admin.js"></script>
+</body>
+</html>
